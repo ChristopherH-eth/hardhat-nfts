@@ -11,4 +11,5 @@ NFT has a different percentage of being minted with the following probabilities:
 - St. Bernard: Common (60%)
 
 Chainlink VRF is used to verify randomness, the user will have to pay to mint the
-NFT, and only the contract owner will be able to withdraw the funds.
+NFT, and only the contract owner will be able to withdraw the funds. Each NFT will
+have its own image and metadata.

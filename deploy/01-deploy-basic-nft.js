@@ -3,7 +3,7 @@ const { developmentChains } = require("../helper-hardhat-config")
 const { verify } = require("../utils/verify")
 
 /**
- * @dev This is a deploy scripts for the BasicNFT contract.
+ * @dev This is a deploy script for the BasicNFT contract.
  */
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
