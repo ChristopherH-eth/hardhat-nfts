@@ -24,12 +24,13 @@ const metadataTemplate = {
         },
     ],
 }
+const FUND_AMOUNT = ethers.utils.parseEther("10") // 10 LINK
 
 /**
  * @dev This function passes getNamedAccounts to get the user accounts, and deployments
  * @dev to use deploy and log functionality from hre (Hardhat Runtime Environment). If a
  * @dev local blockchain is detected via network.name, mocks are deployed; otherwise, the
- * @dev function proceeds directly to Lottery smart contract deployment.
+ * @dev function proceeds directly to RandfomIpfsNFT smart contract deployment.
  * @param deploy Using deploy from hre to deploy mocks.
  * @param log Using log to simplify logging.
  * @param deployer Using deployer account for deploying mocks.
@@ -38,6 +39,8 @@ const metadataTemplate = {
  * or the contract address on the corresponding network.
  * @param subscriptionId The subscription ID emitted from the VRFCoordinatorV2Mock (or
  * VRFCoordinatorV2 if on a testnet) when calling createSubscription().
+ * @param tokenUris Used to store token URIs and set UPLOAD_TO_PINATA to false when no
+ * longer needed.
  */
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
@@ -45,6 +48,11 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
     let vrfCoordinatorV2Address, subscriptionId
+    let tokenUris = [
+        "ipfs://QmaVkBn2tKmjbhphU7eyztbvSQU5EXDdqRyXZtRhSGgJGo",
+        "ipfs://QmYQC5aGZu2PTH8XzbJrbDnvhj3gVs7ya33H9mqUNvST3d",
+        "ipfs://QmZYmH5iDbD6v3U2ixoVAjioSzvWJszDzYdbeCLquGSpVm",
+    ]
 
     // Handle Token URIs if uploading to Pinata
     if (process.env.UPLOAD_TO_PINATA == "true") {
@@ -65,6 +73,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         const tx = await vrfCoordinatorV2Mock.createSubscription()
         const txReceipt = await tx.wait(1)
         subscriptionId = txReceipt.events[0].args.subId
+        await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
     } else {
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
         subscriptionId = networkConfig[chainId].subscriptionId
@@ -77,7 +86,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
      * @param interval Interval requirement for checkUpkeep function.
      * @param args Array of correspond args from "helper-hardhat-config" for contract
      * deployment.
-     * @param lottery Deploys the Lottery smart contract while passing the
+     * @param randomIpfsNFT Deploys the Lottery smart contract while passing the
      * following:
      * 1. from: deployer (contract deployer)
      * 2. args: args (passes args constant)
@@ -87,26 +96,38 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
      */
 
     log("---------------------------------------------")
-    // const args = [
-    //     vrfCoordinatorV2Address,
-    //     subscriptionId,
-    //     networkConfig[chainId].gasLane,
-    //     networkConfig[chainId].callBackGasLimit,
-    //     dogTokenUris,
-    //     networkConfig[chainId].mintFee,
-    // ]
+    const args = [
+        vrfCoordinatorV2Address,
+        subscriptionId,
+        networkConfig[chainId].gasLane,
+        networkConfig[chainId].callBackGasLimit,
+        tokenUris,
+        networkConfig[chainId].mintFee,
+    ]
+
+    const randomIpfsNFT = await deploy("RandomIpfsNFT", {
+        from: deployer,
+        args: args,
+        log: true,
+        waitConfirmations: network.config.blockConfirmations || 1,
+    })
 
     // Call verify script if not on local blockchain and Etherscan API key is present
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
         log("Verifying...")
-        await verify(lottery.address, args)
+        await verify(randomIpfsNFT.address, args)
     }
     log("---------------------------------------------")
 }
 
 /**
  * @dev The handleTokenUris() function handles tokens by storing their image and metadata
- * in IPFS.
+ * in Pinata.
+ * @param imageUploadResponses is the image returned by the storeImages function.
+ * @param imageUploadResponseIndex is the index of a given image returned by the storeImages function.
+ * @param tokenUriMetadata contains the metadata of a token per the metadataTemplate.
+ * @param metadataUploadResponse is the response from the storeTokenUriMetadata function which can then
+ * be used with ".IpfsHash" to get the CID and push it to Pinata.
  */
 
 async function handleTokenUris() {
