@@ -2,6 +2,12 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
 const { getNamedAccounts, ethers, network, deployments, waffle } = require("hardhat")
 const { assert, expect } = require("chai")
 
+/**
+ * @notice These are the unit tests for the Random IPFS NFT smart contract.
+ * @dev Before each unit test we get our deployer account, and deploy the RandomIpfsNFT and
+ * VRFCoordinatorV2Mock contracts.
+ */
+
 !developmentChains.includes(network.name)
     ? describe.skip
     : describe("RandomIpfsNFT", function () {
@@ -57,7 +63,6 @@ const { assert, expect } = require("chai")
            * @dev Tests fulfillRandomWords() functionality.
            */
 
-          // Test token counter
           describe("fulfillRandomWords", function () {
               it("Emits when an NFT is minted", async function () {
                   const transaction = await randomIpfsNFT.requestNFT({ value: mintFee })
@@ -68,6 +73,33 @@ const { assert, expect } = require("chai")
                           randomIpfsNFT.address
                       )
                   ).to.emit(randomIpfsNFT, "NftMinted")
+              })
+
+              it("Counts each minted NFT", async function () {
+                  const counter = await randomIpfsNFT.getTokenCounter()
+                  console.log(`Token counter set to ${counter}`)
+                  const transaction = await randomIpfsNFT.requestNFT({ value: mintFee })
+                  const transactionResponse = await transaction.wait(1)
+                  console.log("Setting event listener...")
+                  await new Promise(async function (resolve, reject) {
+                      randomIpfsNFT.once("NftMinted", async function () {
+                          try {
+                              const newCounter = await randomIpfsNFT.getTokenCounter()
+                              console.log(`Token counter set to ${newCounter}`)
+                              assert.equal(counter.toString(), "0")
+                              assert.equal(newCounter.toString(), "1")
+                              resolve()
+                          } catch (error) {
+                              reject(error)
+                          }
+                      })
+                      console.log("Deploying mock...")
+                      const vrfMock = await vrfCoordinatorV2Mock.fulfillRandomWords(
+                          transactionResponse.events[1].args.requestId,
+                          randomIpfsNFT.address
+                      )
+                      await vrfMock.wait(1)
+                  })
               })
           })
 
@@ -106,6 +138,7 @@ const { assert, expect } = require("chai")
                   const requestNFT = await randomIpfsNFT.requestNFT({ value: mintFee })
                   const requestNFTResponse = await requestNFT.wait(1)
                   console.log("NFT mint request received")
+                  console.log("Setting event listener...")
                   await new Promise(async function (resolve, reject) {
                       randomIpfsNFT.once("NftMinted", async function () {
                           console.log("NFT minted")
@@ -135,7 +168,7 @@ const { assert, expect } = require("chai")
                           requestNFTResponse.events[1].args.requestId,
                           randomIpfsNFT.address
                       )
-                      const vrfMockResponse = await vrfMock.wait(1)
+                      await vrfMock.wait(1)
                   })
               })
           })
