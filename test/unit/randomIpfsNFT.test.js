@@ -38,12 +38,11 @@ const { assert, expect } = require("chai")
                   )
               })
 
-              // Come back to this
               it("Returns a requestId", async function () {
                   const transaction = await randomIpfsNFT.requestNFT({ value: mintFee })
                   const transactionResponse = await transaction.wait(1)
                   const requestId = transactionResponse.events[1].args.requestId.toString()
-                  console.log(requestId)
+                  console.log(`requestId is ${requestId}`)
                   assert.notEqual(requestId, "undefined")
               })
 
@@ -58,11 +57,8 @@ const { assert, expect } = require("chai")
            * @dev Tests fulfillRandomWords() functionality.
            */
 
+          // Test token counter
           describe("fulfillRandomWords", function () {
-              //   beforeEach(async function () {
-              //       await randomIpfsNFT.requestNFT({ value: mintFee })
-              //   })
-
               it("Emits when an NFT is minted", async function () {
                   const transaction = await randomIpfsNFT.requestNFT({ value: mintFee })
                   const transactionResponse = await transaction.wait(1)
@@ -97,6 +93,50 @@ const { assert, expect } = require("chai")
               it("Doesn't allow other users to withdraw funds", async function () {
                   const accounts = await ethers.getSigners()
                   await expect(randomIpfsNFT.withdraw({ from: accounts[1] })).to.be.reverted
+              })
+          })
+
+          /**
+           * @dev Tests getBreedFromModdedRng() functionality.
+           */
+
+          describe("getBreedFromModdedRng", function () {
+              it("Returns correct dog breeds upon random selection", async function () {
+                  let getBreed = []
+                  const requestNFT = await randomIpfsNFT.requestNFT({ value: mintFee })
+                  const requestNFTResponse = await requestNFT.wait(1)
+                  console.log("NFT mint request received")
+                  await new Promise(async function (resolve, reject) {
+                      randomIpfsNFT.once("NftMinted", async function () {
+                          console.log("NFT minted")
+                          try {
+                              for (i = 0; i < 10; i++) {
+                                  getBreed[i] = await randomIpfsNFT.getBreedFromModdedRng(i)
+                                  assert.equal(getBreed[i], "0")
+                              }
+                              console.log("Pugs return correctly")
+                              for (i = 10; i < 40; i++) {
+                                  getBreed[i] = await randomIpfsNFT.getBreedFromModdedRng(i)
+                                  assert.equal(getBreed[i], "1")
+                              }
+                              console.log("Shibas return correctly")
+                              for (i = 40; i < 100; i++) {
+                                  getBreed[i] = await randomIpfsNFT.getBreedFromModdedRng(i)
+                                  assert.equal(getBreed[i], "2")
+                              }
+                              console.log("St. Bernard return correctly")
+                              resolve()
+                          } catch (error) {
+                              reject(error)
+                          }
+                      })
+                      console.log("Deploying mock")
+                      const vrfMock = await vrfCoordinatorV2Mock.fulfillRandomWords(
+                          requestNFTResponse.events[1].args.requestId,
+                          randomIpfsNFT.address
+                      )
+                      const vrfMockResponse = await vrfMock.wait(1)
+                  })
               })
           })
       })
