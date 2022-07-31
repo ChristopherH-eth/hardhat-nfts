@@ -13,3 +13,7 @@ NFT has a different percentage of being minted with the following probabilities:
 Chainlink VRF is used to verify randomness, the user will have to pay to mint the
 NFT, and only the contract owner will be able to withdraw the funds. Each NFT will
 have its own image and metadata.
+
+## Dynamic SVG NFT (DynamicSvgNFT.sol)
+This contract allows the creation of an NFT with dynamic characteristics based on
+the Chainlink price feed.
