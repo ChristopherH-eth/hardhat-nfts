@@ -3,6 +3,10 @@ const path = require("path")
 const fs = require("fs")
 require("dotenv").config
 
+/**
+ * @dev Script to store NFT image data and metadata on IPFS via Pinata.
+ */
+
 const pinataApiKey = process.env.PINATA_API_KEY
 const pinataApiSecret = process.env.PINATA_API_SECRET
 const pinata = pinataSDK(pinataApiKey, pinataApiSecret)

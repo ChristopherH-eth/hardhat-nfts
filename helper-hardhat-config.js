@@ -5,7 +5,6 @@ networkConfig = {
         name: "hardhat",
         gasLane: "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc",
         callBackGasLimit: "500000",
-        interval: "30",
         mintFee: ethers.utils.parseEther("0.001"),
     },
     4: {
@@ -14,8 +13,8 @@ networkConfig = {
         gasLane: "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc",
         subscriptionId: "9063", // VRF subscriptionId
         callBackGasLimit: "500000",
-        interval: "30",
         mintFee: ethers.utils.parseEther("0.001"),
+        ethUsdPriceFeed: "0x8A753747A1Fa494EC906cE90E9f37563A8AF630e",
     },
 }
 

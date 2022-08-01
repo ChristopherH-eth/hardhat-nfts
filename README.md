@@ -16,4 +16,5 @@ have its own image and metadata.
 
 ## Dynamic SVG NFT (DynamicSvgNFT.sol)
 This contract allows the creation of an NFT with dynamic characteristics based on
-the Chainlink price feed.
+the Chainlink price feed. In this project the user will mint one of two NFTs: a frown
+face NFT when the price is down, and a happy face NFT when the price is up.

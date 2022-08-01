@@ -83,10 +83,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
      * @param entranceFee Contains an entranceFee for the connected network.
      * @param gasLane Key hash for corresponding gwei requirement.
      * @param callBackGasLimit Maximum gas limit for the contract to deploy with.
-     * @param interval Interval requirement for checkUpkeep function.
      * @param args Array of correspond args from "helper-hardhat-config" for contract
      * deployment.
-     * @param randomIpfsNFT Deploys the Lottery smart contract while passing the
+     * @param randomIpfsNFT Deploys the RandomIpfsNFT smart contract while passing the
      * following:
      * 1. from: deployer (contract deployer)
      * 2. args: args (passes args constant)

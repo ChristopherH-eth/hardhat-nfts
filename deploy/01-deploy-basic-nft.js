@@ -11,7 +11,16 @@ const { verify } = require("../utils/verify")
  * @dev to use deploy and log functionality from hre (Hardhat Runtime Environment).
  * @param deploy Using deploy from hre to deploy mocks.
  * @param log Using log to simplify logging.
+ * @param args Array of correspond args from "helper-hardhat-config" for contract
+ * deployment (empty in this case).
  * @param deployer Using deployer account for deploying mocks.
+ * @param basicNft Deploys the RandomIpfsNFT smart contract while passing the
+ * following:
+ * 1. from: deployer (contract deployer)
+ * 2. args: args (passes args constant)
+ * 3. log: true (enables logging on deployment)
+ * 4. waitConfirmations waits a predetermined number of block confirmations
+ * based on the network or 1.
  */
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
