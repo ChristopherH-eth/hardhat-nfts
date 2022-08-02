@@ -66,6 +66,7 @@ contract RandomIpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         string[3] memory dogTokenUris,
         uint256 mintFee
     ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721("Random IPFS NFT", "RIN") {
+        s_tokenCounter = 0;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
@@ -81,7 +82,6 @@ contract RandomIpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
      * @param requestId represents the requestId for the randomness from the Chainlink
      * node. It's also used to ensure the NFT is minted to the user, not the Chainlink
      * node responding to the requestRandomWords() call.
-     * @return requestId
      */
 
     function requestNFT() public payable returns (uint256 requestId) {
@@ -145,7 +145,6 @@ contract RandomIpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
      * @dev the Breed based on the enum Breed.
      * @param moddedRng is the modulo calculation of randomWords[0] from the Chainlink node, and
      * MAX_CHANCE_VALUE from the chanceArray[].
-     * @return Breed
      */
 
     function getBreedFromModdedRng(uint256 moddedRng) public pure returns (Breed) {
@@ -153,10 +152,10 @@ contract RandomIpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         uint256[3] memory chanceArray = getChanceArray();
 
         for (uint256 i = 0; i < chanceArray.length; i++) {
-            if (moddedRng >= cumulativeSum && moddedRng < cumulativeSum + chanceArray[i]) {
+            if (moddedRng >= cumulativeSum && moddedRng < chanceArray[i]) {
                 return Breed(i);
             }
-            cumulativeSum += chanceArray[i];
+            cumulativeSum = chanceArray[i];
         }
         revert RandomIpfsNFT__RangeOutOfBounds();
     }
@@ -164,7 +163,6 @@ contract RandomIpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     /**
      * @dev The getChanceArray() function returns the chanceArray for the moddedRng calculation,
      * @dev (see getBreedFromModdedRng() function).
-     * @return [3]
      */
 
     function getChanceArray() public pure returns (uint256[3] memory) {

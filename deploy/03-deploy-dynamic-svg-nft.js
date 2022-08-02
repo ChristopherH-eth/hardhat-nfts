@@ -54,11 +54,11 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
      */
 
     log("---------------------------------------------")
+    log("Deploying contract...")
+
     const lowSVG = await fs.readFileSync("./images/dynamicNFT/frown.svg", { encoding: "utf8" })
     const highSVG = await fs.readFileSync("./images/dynamicNFT/happy.svg", { encoding: "utf8" })
     const args = [ethUsdPriceFeedAddress, lowSVG, highSVG]
-
-    log("Deploying contract...")
 
     dynamicSvgNFT = await deploy("DynamicSvgNFT", {
         from: deployer,
@@ -71,10 +71,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 
     // Call verify script if not on local blockchain and Etherscan API key is present
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        log("Verifying contract...")
         await verify(dynamicSvgNFT.address, args)
-        log("Contract verified.")
     }
+
     log("---------------------------------------------")
 }
 

@@ -28,6 +28,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deployer } = await getNamedAccounts()
 
     log("---------------------------------------------")
+    log("Deploying contract...")
+
     const args = []
     const basicNft = await deploy("BasicNFT", {
         from: deployer,
@@ -36,11 +38,13 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         waitConfirmations: network.config.blockConfirmations || 1,
     })
 
+    log("Contract deployed.")
+
     // Call verify script if not on local blockchain and Etherscan API key is present
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        log("Verifying...")
         await verify(basicNft.address, args)
     }
+
     log("---------------------------------------------")
 }
 

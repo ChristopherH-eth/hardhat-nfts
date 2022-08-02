@@ -95,6 +95,8 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
      */
 
     log("---------------------------------------------")
+    log("Deploying contract...")
+
     const args = [
         vrfCoordinatorV2Address,
         subscriptionId,
@@ -103,7 +105,6 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         tokenUris,
         networkConfig[chainId].mintFee,
     ]
-
     const randomIpfsNFT = await deploy("RandomIpfsNFT", {
         from: deployer,
         args: args,
@@ -111,9 +112,10 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         waitConfirmations: network.config.blockConfirmations || 1,
     })
 
+    log("Contract deployed.")
+
     // Call verify script if not on local blockchain and Etherscan API key is present
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        log("Verifying...")
         await verify(randomIpfsNFT.address, args)
     }
     log("---------------------------------------------")

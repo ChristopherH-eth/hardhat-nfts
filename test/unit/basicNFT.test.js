@@ -37,6 +37,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
 
           describe("mintNFT", function () {
               it("Lets the user mint an NFT and updates accordingly", async function () {
+                  console.log("Minting NFT...")
                   const txResponse = await basicNFT.mintNFT()
                   await txResponse.wait(1)
                   const tokenURI = await basicNFT.tokenURI(0)
